@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+db.sqlite3
+
+# Django media & static
+/media/
+/staticfiles/
+/static/
+STATIC_ROOT/
+MEDIA_ROOT/
+
+# Environment
+.env
+*.env
+env/
+venv/
+ENV/
+.venv/
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Migrations (optional — keep if you want)
+# Remove this block if you track all migrations
+*/migrations/*
+!/core/migrations/
+!*/migrations/__init__.py
+
+# Byte-compiled / optimized / DLL files
+*.so
+*.dll
+*.dylib
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.tox/
+.nox/
+.pytest_cache/
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+
+# OS generated files
+.DS_Store
+Thumbs.db
