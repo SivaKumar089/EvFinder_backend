@@ -1,25 +1,48 @@
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-class IsEvUser(permissions.BasePermission):
+
+class IsEvUser(BasePermission):
     """
-    Allow only authenticated users who are EV users (role 'user' or 'ev_user').
-    Adjust role strings to match your project.
+    Allows access only to EV users (role = 'user').
+    Used for: Booking create, fake pay, my bookings.
     """
     def has_permission(self, request, view):
         user = request.user
-        if not user or not user.is_authenticated:
-            return False
-        role = getattr(user, "role", None)
-        return role in ("user", "ev_user", "customer") or role is None and user.is_authenticated
+        return bool(
+            user.is_authenticated and 
+            getattr(user, "role", None) == "evowner"
+        )
 
-class IsEvOwnerOrAdmin(permissions.BasePermission):
+
+class IsEvOwnerOrAdmin(BasePermission):
     """
-    Allow only station owner / admin to perform certain actions (e.g., create station).
-    Adjust role strings to match your project.
+    Allows access only to station owners or admin.
+    Used for: Station CRUD
     """
     def has_permission(self, request, view):
         user = request.user
-        if not user or not user.is_authenticated:
-            return False
         role = getattr(user, "role", None)
-        return role in ("owner", "ev_owner", "admin")
+
+        if not user.is_authenticated:
+            return False
+
+        # Owners & Admin have full access
+        if role in ("chargerowner", "admin"):
+            return True
+
+        # Safe methods allowed for all authenticated users
+        if request.method in SAFE_METHODS:
+            return True
+
+        return False
+
+
+class IsAdmin(BasePermission):
+    """
+    Only admin can access this endpoint.
+    """
+    def has_permission(self, request, view):
+        return bool(
+            request.user.is_authenticated and 
+            getattr(request.user, "role", None) == "admin"
+        )

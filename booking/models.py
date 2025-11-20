@@ -3,8 +3,8 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 import uuid
+from stations.models import *
 
-User = settings.AUTH_USER_MODEL
 
 
 
@@ -24,18 +24,16 @@ class Booking(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="bookings")
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name="bookings")
     created_at = models.DateTimeField(auto_now_add=True)
-    # booking reserved for 2 minutes from created_at
     expires_at = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    meta = models.JSONField(null=True, blank=True)  # any extra data (count, vehicle type ...)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # amount to pay
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING) 
+    amount = models.DecimalField(max_digits=10, decimal_places=2,null=True)
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
-            self.expires_at = self.created_at + timedelta(minutes=2) if self.created_at else timezone.now() + timedelta(minutes=2)
+            self.expires_at = self.created_at + timedelta(minutes=5) if self.created_at else timezone.now() + timedelta(minutes=5)
         super().save(*args, **kwargs)
 
     def is_expired(self):
