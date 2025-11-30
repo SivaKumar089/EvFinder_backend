@@ -59,7 +59,7 @@ class SignupSendOTPView(views.APIView):
         otp_record = SignupOTP.objects.create(email=email, code=code)
 
         # Send email
-        html_template = get_template("signup_otp.html")
+        html_template = get_template("../templates/Signup_otp.html")
         html_content = html_template.render({"otp": code, "username": email.split("@")[0]})
 
         subject = "EVLocate Signup OTP"
@@ -191,7 +191,7 @@ def send_otp(request):
         user = Users.objects.get(email=email)
         otp = str(randint(1000, 9999))
 
-        EmailOTP.objects.filter(user=user).delete()
+        
         EmailOTP.objects.create(user=user, otp=otp)
         send_otp_email(user, otp)
         return Response({"message": "OTP sent successfully to your email."}, status=200)

@@ -4,7 +4,7 @@ from django.conf import settings
 
 def send_otp_email(user, otp):
     subject = "EVLocate - Email Verification Code"
-    message = render_to_string('otp_email.html', {
+    message = render_to_string('../templates/reset_password_email.html', {
         'username': user.username,
         'otp': otp,
     })
