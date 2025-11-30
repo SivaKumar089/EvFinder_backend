@@ -27,7 +27,8 @@ SECRET_KEY = 'django-insecure-^f86q_+4mmh!p#q75f3hkz=#phk%k-_@85-x%&#d#s!*^=(y5r
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+from dotenv import load_dotenv
+load_dotenv()
 
 # Application definition
 
@@ -58,13 +59,19 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'evfinder.urls'
 
+import os
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -72,6 +79,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'evfinder.wsgi.application'
 
@@ -87,10 +95,7 @@ WSGI_APPLICATION = 'evfinder.wsgi.application'
 # }
 
 
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
 
 DATABASES = {
     'default': {
