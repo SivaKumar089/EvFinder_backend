@@ -12,5 +12,7 @@ PyMySQL==1.1.2
 python-decouple==3.8
 python-dotenv==1.2.1
 pytz==2025.2
+setuptools==80.9.0
 sqlparse==0.5.3
 tzdata==2025.2
+wheel==0.45.1
