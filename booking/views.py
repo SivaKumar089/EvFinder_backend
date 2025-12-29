@@ -27,9 +27,20 @@ class BookingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         qs = super().get_queryset()
-        if user.role == "admin":
-            return qs
-        return qs.filter(user=user)
+
+        # Owner → Avan own panna station bookings mattum
+        if user.role == "chargerowner":
+            qs = qs.filter(station__owner=user)
+        else:
+            qs = qs.filter(user=user)
+
+        station_id = self.request.query_params.get('station_id')
+        if station_id and station_id.isdigit():
+            qs = qs.filter(station_id=station_id)
+
+        return qs
+
+
 
     @action(detail=True, methods=["POST"], url_path="fake-pay")
     def fake_pay(self, request, pk=None):
@@ -82,7 +93,7 @@ class BookingViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
-
+ 
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -105,7 +116,7 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == "admin":
+        if user.role == "owner":
             return Payment.objects.all()
         return Payment.objects.filter(booking__user=user)
     
@@ -160,3 +171,53 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
             "station": booking.station.name,
             "status": "PAID"
         }, status=200)
+
+
+
+
+from django.db.models import Count, Sum, Q
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+class OwnerStationSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        
+        if user.role != "chargerowner":
+            return Response({"detail": "Not allowed"}, status=403)
+
+        data = (
+            Booking.objects
+            .filter(station__owner=user)
+            .values("station__id", "station__name")
+            .annotate(
+                total_bookings=Count("id"),
+                paid_bookings=Count("id", filter=Q(status="CONFIRMED")),
+                pending_bookings=Count("id", filter=Q(status="PENDING")),
+                expired_bookings=Count("id", filter=Q(status="EXPIRED")),
+                total_revenue=Sum("amount", filter=Q(status="CONFIRMED"))
+            )
+            .order_by("-total_bookings")
+        )
+
+        return Response(data)
+
+
+
+class StationBookingList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, station_id):
+        user = request.user
+        
+        # Ensure owner access
+        if user.role != "chargerowner":
+            return Response({"detail": "Not allowed"}, status=403)
+
+        qs = Booking.objects.filter(station__id=station_id, station__owner=user)
+
+        serializer = BookingSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)

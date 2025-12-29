@@ -6,32 +6,28 @@ from rest_framework import serializers
 from .models import Booking
 
 class BookingSerializer(serializers.ModelSerializer):
-    # station_id = serializers.UUIDField(source="station.id", read_only=True)
     station_name = serializers.CharField(source="station.name", read_only=True)
-    user_id = serializers.UUIDField(source="user.id", read_only=True)
     user_name = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = Booking
         fields = [
             "id",
-            "station",          # <== write-only input
-            # "station_id",
-            "station_name",
-            "user_id",
-            "user_name",
+            "station",          # Input
+            "station_name",     # Output
+            "user_name",        # Output
             "amount",
             "status",
             "created_at",
             "expires_at",
         ]
-
         extra_kwargs = {
-            "station": {"write_only": True, "required": True},  # <== IMPORTANT FIX
+            "station": {"write_only": True, "required": True},
             "status": {"read_only": True},
             "created_at": {"read_only": True},
             "expires_at": {"read_only": True},
         }
+
 
 
 from rest_framework import serializers
